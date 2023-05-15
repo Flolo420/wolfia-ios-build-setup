@@ -14,22 +14,12 @@ export enum ProfileState {
   INVALID = 'INVALID'
 }
 
-export interface Certificate {
-  attributes: {
-    certificateContent: string
-    name: string
-  }
-}
-
 export interface Profile {
   id: string
   attributes: {
     name: string
     profileState: ProfileState
     profileContent: string
-  }
-  relationships: {
-    certificates: {data: {id: string}[]}
   }
 }
 
@@ -55,6 +45,6 @@ export class AppStoreConnectAPI {
 
   async getProfiles(): Promise<APIResponse<Profile[]>> {
     core.info(`Fetching profiles...`)
-    return this.get('/v1/profiles?include=certificates')
+    return this.get('/v1/profiles')
   }
 }
