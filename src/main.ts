@@ -2,6 +2,7 @@ import {getInputs} from './inputs'
 import {AppStoreConnectAPI} from './api'
 import {fetchProfile} from './profile'
 import {fetchCertificate} from './certificate'
+import {setupBuildEnvironment} from './setup'
 
 async function run(): Promise<void> {
   const {
@@ -21,7 +22,9 @@ async function run(): Promise<void> {
   if (!profile) return
 
   const certificateId = profile.relationships.certificates.data[0].id
-  fetchCertificate(api, certificateId)
+  const certificate = await fetchCertificate(api, certificateId)
+
+  await setupBuildEnvironment(profile, certificate, appStoreConnectSecret)
 }
 
 run()

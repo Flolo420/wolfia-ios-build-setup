@@ -4,7 +4,7 @@ import {AppStoreConnectAPI, Certificate} from './api'
 export const fetchCertificate = async (
   api: AppStoreConnectAPI,
   certificateId: string
-): Promise<Certificate | undefined> => {
+): Promise<Certificate> => {
   const {data: certificate} = await api.getCertificate(certificateId)
   core.info(`Fetched associated "${certificate.attributes.name}" certificate.`)
 
