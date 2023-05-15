@@ -18,21 +18,21 @@ jobs:
         run: |
           npm ci
           npm run all
-      # - name: Run action
-      #   id: ios-build-setup
-      #   uses: ./
-      #   with:
-      #     app-store-connect-api-key-id: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-      #     app-store-connect-api-issuer: ${{ secrets.APP_STORE_CONNECT_API_ISSUER }}
-      #     app-store-connect-secret-base64: ${{ secrets.APP_STORE_CONNECT_SECRET_BASE64 }}
-      #     profile-name: 'Profile Name'
+      - name: Run action
+        id: ios-build-setup
+        uses: ./
+        with:
+          app-store-connect-api-key-id: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          app-store-connect-api-issuer: ${{ secrets.APP_STORE_CONNECT_API_ISSUER }}
+          app-store-connect-secret-base64: ${{ secrets.APP_STORE_CONNECT_SECRET_BASE64 }}
+          profile-name: 'Wolfia Ad Hoc Provisioning Profile'
+          certificate-password: '1234'
       # - name: Output decoded profile
       #   run: |
       #     echo -n "${{ steps.ios-build-setup.outputs.provisioning-profile }}" | base64 --decode
       - name: Validate distribution
         run: npm run validate-distribution
-      # TODO: enable once one version has been released.
-      # - name: Validate version
-      #   run: npm run validate-version
+      - name: Validate version
+        run: npm run validate-version
       - name: Validate formatting
         run: npm run validate-formatting

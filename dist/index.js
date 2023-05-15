@@ -6,6 +6,29 @@ require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -20,7 +43,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AppStoreConnectAPI = exports.ProfileState = void 0;
+const core = __importStar(__nccwpck_require__(2186));
 const axios_1 = __importDefault(__nccwpck_require__(8757));
+const jwt_1 = __nccwpck_require__(6766);
 const APP_STORE_CONNECT_API_BASE = 'https://api.appstoreconnect.apple.com';
 // eslint-disable-next-line no-shadow
 var ProfileState;
@@ -29,8 +54,8 @@ var ProfileState;
     ProfileState["INVALID"] = "INVALID";
 })(ProfileState = exports.ProfileState || (exports.ProfileState = {}));
 class AppStoreConnectAPI {
-    constructor(token) {
-        this.token = token;
+    constructor(tokenOptions) {
+        this.token = (0, jwt_1.getToken)(tokenOptions);
     }
     get(resource) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -42,13 +67,70 @@ class AppStoreConnectAPI {
             return response.data;
         });
     }
+    getCertificate(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            core.info(`Fetching certificate...`);
+            return this.get(`/v1/certificates/${id}`);
+        });
+    }
     getProfiles() {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.get('/v1/profiles');
+            core.info(`Fetching profiles...`);
+            return this.get('/v1/profiles?include=certificates');
         });
     }
 }
 exports.AppStoreConnectAPI = AppStoreConnectAPI;
+
+
+/***/ }),
+
+/***/ 3597:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.fetchCertificate = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const fetchCertificate = (api, certificateId) => __awaiter(void 0, void 0, void 0, function* () {
+    const { data: certificate } = yield api.getCertificate(certificateId);
+    core.info(`Fetched associated "${certificate.attributes.name}" certificate.`);
+    return certificate;
+});
+exports.fetchCertificate = fetchCertificate;
 
 
 /***/ }),
@@ -95,6 +177,9 @@ const getInputs = () => {
         appStoreConnectSecret: Buffer.from(core.getInput('app-store-connect-secret-base64', {
             required: true
         }), 'base64').toString('ascii'),
+        certificatePassword: core.getInput('certificate-password', {
+            required: true
+        }),
         profileName: core.getInput('profile-name', { required: true })
     };
 };
@@ -108,15 +193,40 @@ exports.getInputs = getInputs;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getToken = void 0;
+const core = __importStar(__nccwpck_require__(2186));
 const jsonwebtoken_1 = __importDefault(__nccwpck_require__(7486));
 const getNowSeconds = () => Math.round(new Date().getTime() / 1000);
 const EXPIRATION_TIME = 10 * 60; // 10 minutes
 const getToken = ({ appStoreConnectApiKey, appStoreConnectApiIssuer, appStoreConnectSecret }) => {
+    core.info(`Generating JWT...`);
     const exp = getNowSeconds() + EXPIRATION_TIME;
     const payload = {
         iss: appStoreConnectApiIssuer,
@@ -139,6 +249,45 @@ exports.getToken = getToken;
 /***/ }),
 
 /***/ 3109:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const inputs_1 = __nccwpck_require__(6180);
+const api_1 = __nccwpck_require__(8947);
+const profile_1 = __nccwpck_require__(6171);
+const certificate_1 = __nccwpck_require__(3597);
+function run() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { appStoreConnectApiKey, appStoreConnectApiIssuer, appStoreConnectSecret, profileName } = (0, inputs_1.getInputs)();
+        const api = new api_1.AppStoreConnectAPI({
+            appStoreConnectApiKey,
+            appStoreConnectApiIssuer,
+            appStoreConnectSecret
+        });
+        const profile = yield (0, profile_1.fetchProfile)(api, profileName);
+        if (!profile)
+            return;
+        const certificateId = profile.relationships.certificates.data[0].id;
+        (0, certificate_1.fetchCertificate)(api, certificateId);
+    });
+}
+run();
+
+
+/***/ }),
+
+/***/ 6171:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -176,39 +325,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.fetchProfile = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-const inputs_1 = __nccwpck_require__(6180);
-const jwt_1 = __nccwpck_require__(6766);
 const api_1 = __nccwpck_require__(8947);
-function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const { appStoreConnectApiKey, appStoreConnectApiIssuer, appStoreConnectSecret, profileName } = (0, inputs_1.getInputs)();
-        core.info(`Generating JWT...`);
-        const token = (0, jwt_1.getToken)({
-            appStoreConnectApiKey,
-            appStoreConnectApiIssuer,
-            appStoreConnectSecret
-        });
-        const api = new api_1.AppStoreConnectAPI(token);
-        core.info(`Fetching profiles...`);
-        const profiles = yield api.getProfiles();
-        const profile = profiles.data.find(prof => prof.attributes.name === profileName);
-        if (!profile) {
-            core.setFailed(`Profile "${profileName}" not found. Please confirm the profile name is correct and exists.`);
-            return;
-        }
-        if (profile.attributes.profileState !== api_1.ProfileState.ACTIVE) {
-            core.setFailed(`Profile "${profileName}" is ${profile.attributes.profileState}. Please confirm the profile is active and valid.`);
-            return;
-        }
-        core.info(`Profile "${profileName}" found.`);
-        // Hide the value from being output in logs.
-        core.setSecret(profile.attributes.profileContent);
-        // Output the value so subsequent steps can use it.
-        core.setOutput('provisioning-profile', profile.attributes.profileContent);
-    });
-}
-run();
+const fetchProfile = (api, profileName) => __awaiter(void 0, void 0, void 0, function* () {
+    const profiles = yield api.getProfiles();
+    const profile = profiles.data.find(prof => prof.attributes.name === profileName);
+    if (!profile) {
+        core.setFailed(`Profile "${profileName}" not found. Please confirm the profile name is correct and exists.`);
+        return;
+    }
+    if (profile.attributes.profileState !== api_1.ProfileState.ACTIVE) {
+        core.setFailed(`Profile "${profileName}" is ${profile.attributes.profileState}. Please confirm the profile is active and valid.`);
+        return;
+    }
+    core.info(`Profile "${profileName}" found.`);
+    return profile;
+});
+exports.fetchProfile = fetchProfile;
 
 
 /***/ }),
