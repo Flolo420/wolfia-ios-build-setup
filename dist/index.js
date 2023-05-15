@@ -70,7 +70,7 @@ class AppStoreConnectAPI {
     getProfiles() {
         return __awaiter(this, void 0, void 0, function* () {
             core.info(`Fetching profiles...`);
-            return this.get('/v1/profiles?include=certificates');
+            return this.get('/v1/profiles');
         });
     }
 }
