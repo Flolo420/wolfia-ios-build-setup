@@ -15,7 +15,10 @@ inputs:
     description: 'App Store Connect API private key file contents (base64 encoded)'
     required: true
   profile-name:
-    description: 'Name of the provisioning profile to use'
+    description: 'The name of the provisioning profile to fetch and use'
+    required: true
+  certificate-password:
+    description: 'The password for the certificate associated with the provisioning profile used to sign the app'
     required: true
 runs:
   using: 'node16'

@@ -4,6 +4,7 @@ interface Inputs {
   appStoreConnectApiKey: string
   appStoreConnectApiIssuer: string
   appStoreConnectSecret: string
+  certificatePassword: string
   profileName: string
 }
 
@@ -21,6 +22,9 @@ export const getInputs = (): Inputs => {
       }),
       'base64'
     ).toString('ascii'),
+    certificatePassword: core.getInput('certificate-password', {
+      required: true
+    }),
     profileName: core.getInput('profile-name', {required: true})
   }
 }
