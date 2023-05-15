@@ -3,7 +3,7 @@ import {exec} from '@actions/exec'
 import * as path from 'path'
 import * as fs from 'fs'
 import * as crypto from 'crypto'
-import {Certificate, Profile} from './api'
+import {Profile} from './api'
 
 const CERTIFICATE_PATH = path.join(
   process.env.RUNNER_TEMP!,
@@ -22,25 +22,24 @@ const KEYCHAIN_PATH = path.join(
 
 const KEYCHAIN_PASSWORD = crypto.randomBytes(64).toString('hex')
 
-const decode = (data: string): string =>
-  Buffer.from(data, 'base64').toString('ascii')
-
 export const setupBuildEnvironment = async (
   profile: Profile,
-  certificate: Certificate,
+  certificate: string,
   certificatePassword: string
 ): Promise<void> => {
   core.info(`Importing "${profile.attributes.name}" provisioning profile...`)
-  const profileContents = decode(profile.attributes.profileContent)
+  const profileContents = Buffer.from(
+    profile.attributes.profileContent,
+    'base64'
+  ).toString()
   fs.writeFileSync(PROFILE_PATH, profileContents)
 
-  core.info(`Importing "${certificate.attributes.name}" certificate...`)
-  const certificateContent = decode(certificate.attributes.certificateContent)
-  fs.writeFileSync(CERTIFICATE_PATH, certificateContent)
+  core.info(`Importing certificate...`)
+  fs.writeFileSync(CERTIFICATE_PATH, certificate, {encoding: 'binary'})
 
   core.info(`Creating a temporary keychain...`)
   await exec(
-    `security import ${CERTIFICATE_PATH} -P "${certificatePassword}" -A -t cert -f pkcs12 -k ${KEYCHAIN_PATH}`
+    `security create-keychain -p "${KEYCHAIN_PASSWORD}" ${KEYCHAIN_PATH}`
   )
   await exec(`security set-keychain-settings -lut 21600 ${KEYCHAIN_PATH}`)
   await exec(
@@ -54,9 +53,9 @@ export const setupBuildEnvironment = async (
   await exec(`security list-keychain -d user -s ${KEYCHAIN_PATH}`)
 
   core.info(`Applying provisioning profile...`)
-  await exec(`mkdir -p ~/Library/MobileDevice/Provisioning\\ Profiles`)
+  await exec(`mkdir -p "~/Library/MobileDevice/Provisioning Profiles"`)
   await exec(
-    `cp ${PROFILE_PATH} ~/Library/MobileDevice/Provisioning\\ Profiles`
+    `cp ${PROFILE_PATH} "~/Library/MobileDevice/Provisioning Profiles"`
   )
 
   core.info(`Build environment setup completed.`)

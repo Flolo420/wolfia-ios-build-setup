@@ -25,8 +25,9 @@ jobs:
       #     app-store-connect-api-key-id: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
       #     app-store-connect-api-issuer: ${{ secrets.APP_STORE_CONNECT_API_ISSUER }}
       #     app-store-connect-secret-base64: ${{ secrets.APP_STORE_CONNECT_SECRET_BASE64 }}
-      #     profile-name: 'Profile Name'
+      #     certificate-base64: ${{ secrets.CERTIFICATE_BASE64 }}
       #     certificate-password: ${{ secrets.CERTIFICATE_PASSWORD }}
+      #     profile-name: 'Profile Name'
       - name: Validate distribution
         run: npm run validate-distribution
       - name: Validate version

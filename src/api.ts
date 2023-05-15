@@ -53,11 +53,6 @@ export class AppStoreConnectAPI {
     return response.data
   }
 
-  async getCertificate(id: string): Promise<APIResponse<Certificate>> {
-    core.info(`Fetching certificate...`)
-    return this.get(`/v1/certificates/${id}`)
-  }
-
   async getProfiles(): Promise<APIResponse<Profile[]>> {
     core.info(`Fetching profiles...`)
     return this.get('/v1/profiles?include=certificates')
