@@ -19,7 +19,6 @@ jobs:
           npm ci
           npm run all
       # - name: Run action
-      #   id: ios-build-setup
       #   uses: ./
       #   with:
       #     app-store-connect-api-key-id: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
