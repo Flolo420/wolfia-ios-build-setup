@@ -341,7 +341,7 @@ const KEYCHAIN_PATH = path.join(process.env.RUNNER_TEMP, 'app-signing.keychain-d
 const KEYCHAIN_PASSWORD = crypto.randomBytes(64).toString('hex');
 const setupBuildEnvironment = (profile, certificate, certificatePassword) => __awaiter(void 0, void 0, void 0, function* () {
     core.info(`Importing "${profile.attributes.name}" provisioning profile...`);
-    const profileContents = Buffer.from(profile.attributes.profileContent, 'base64').toString('binary');
+    const profileContents = Buffer.from(profile.attributes.profileContent, 'base64').toString();
     fs.writeFileSync(PROFILE_PATH, profileContents, { encoding: 'binary' });
     core.info(`Importing certificate...`);
     fs.writeFileSync(CERTIFICATE_PATH, certificate, { encoding: 'binary' });
