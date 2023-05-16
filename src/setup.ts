@@ -10,10 +10,9 @@ const CERTIFICATE_PATH = path.join(
   'build_certificate.p12'
 )
 
-const PROFILE_PATH = path.join(
-  process.env.RUNNER_TEMP!,
-  'build_provisioning_profile.mobileprovision'
-)
+const PROFILE_NAME = 'build_provisioning_profile.mobileprovision'
+
+const PROFILE_PATH = path.join(process.env.RUNNER_TEMP!, PROFILE_NAME)
 
 const KEYCHAIN_PATH = path.join(
   process.env.RUNNER_TEMP!,
@@ -21,6 +20,11 @@ const KEYCHAIN_PATH = path.join(
 )
 
 const KEYCHAIN_PASSWORD = crypto.randomBytes(64).toString('hex')
+
+const PROFILES_DIRECTORY = path.join(
+  process.env.HOME!,
+  'Library/MobileDevice/Provisioning Profiles'
+)
 
 export const setupBuildEnvironment = async (
   profile: Profile,
@@ -31,7 +35,7 @@ export const setupBuildEnvironment = async (
   const profileContents = Buffer.from(
     profile.attributes.profileContent,
     'base64'
-  ).toString()
+  ).toString('binary')
   fs.writeFileSync(PROFILE_PATH, profileContents, {encoding: 'binary'})
 
   core.info(`Importing certificate...`)
@@ -53,10 +57,8 @@ export const setupBuildEnvironment = async (
   await exec(`security list-keychain -d user -s ${KEYCHAIN_PATH}`)
 
   core.info(`Applying provisioning profile...`)
-  await exec(`mkdir -p "~/Library/MobileDevice/Provisioning Profiles"`)
-  await exec(
-    `cp ${PROFILE_PATH} "~/Library/MobileDevice/Provisioning Profiles"`
-  )
+  fs.mkdirSync(PROFILES_DIRECTORY, {recursive: true})
+  fs.copyFileSync(PROFILE_PATH, path.join(PROFILES_DIRECTORY, PROFILE_NAME))
 
   core.info(`Build environment setup completed.`)
 }
