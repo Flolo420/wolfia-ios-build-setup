@@ -18,6 +18,7 @@ jobs:
         run: |
           npm ci
           npm run all
+          ACTIONS_RUNNER_HOOK_JOB_COMPLETED=/cleanup_script.sh
       # - name: Run action
       #   id: ios-build-setup
       #   uses: ./
