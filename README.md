@@ -1,4 +1,4 @@
-# Wolfia iOS Build Setup v0.0.5
+# Wolfia iOS Build Setup v0.0.6
 
 A GitHub Action to setup the environment for building and signing iOS apps.
 
