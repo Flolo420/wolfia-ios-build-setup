@@ -107,12 +107,29 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.cleanup = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-const cleanup = () => {
+const fs = __importStar(__nccwpck_require__(7147));
+const exec_1 = __nccwpck_require__(1514);
+const setup_1 = __nccwpck_require__(7391);
+const cleanup = () => __awaiter(void 0, void 0, void 0, function* () {
     core.info('Cleaning up...');
-};
+    core.info('Deleting Keychain...');
+    yield (0, exec_1.exec)(`security delete-keychain ${setup_1.KEYCHAIN_PATH}`);
+    core.info('Removing provisioning profile...');
+    fs.unlinkSync(setup_1.PROFILE_PATH);
+    core.info('Cleanup completed.');
+});
 exports.cleanup = cleanup;
 
 
@@ -374,7 +391,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.setupBuildEnvironment = void 0;
+exports.setupBuildEnvironment = exports.KEYCHAIN_PATH = exports.PROFILE_PATH = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const exec_1 = __nccwpck_require__(1514);
 const path = __importStar(__nccwpck_require__(1017));
@@ -382,26 +399,27 @@ const fs = __importStar(__nccwpck_require__(7147));
 const crypto = __importStar(__nccwpck_require__(6113));
 const CERTIFICATE_PATH = path.join(process.env.RUNNER_TEMP, 'build_certificate.p12');
 const PROFILE_NAME = 'build_provisioning_profile.mobileprovision';
-const PROFILE_PATH = path.join(process.env.RUNNER_TEMP, PROFILE_NAME);
-const KEYCHAIN_PATH = path.join(process.env.RUNNER_TEMP, 'app-signing.keychain-db');
-const KEYCHAIN_PASSWORD = crypto.randomBytes(64).toString('hex');
+const PROFILE_TEMP_PATH = path.join(process.env.RUNNER_TEMP, PROFILE_NAME);
 const PROFILES_DIRECTORY = path.join(process.env.HOME, 'Library/MobileDevice/Provisioning Profiles');
+exports.PROFILE_PATH = path.join(PROFILES_DIRECTORY, PROFILE_NAME);
+exports.KEYCHAIN_PATH = path.join(process.env.RUNNER_TEMP, 'app-signing.keychain-db');
+const KEYCHAIN_PASSWORD = crypto.randomBytes(64).toString('hex');
 const setupBuildEnvironment = (profile, certificate, certificatePassword) => __awaiter(void 0, void 0, void 0, function* () {
     core.info(`Importing "${profile.attributes.name}" provisioning profile...`);
     const profileContents = Buffer.from(profile.attributes.profileContent, 'base64').toString('binary');
-    fs.writeFileSync(PROFILE_PATH, profileContents, { encoding: 'binary' });
+    fs.writeFileSync(PROFILE_TEMP_PATH, profileContents, { encoding: 'binary' });
     core.info(`Importing certificate...`);
     fs.writeFileSync(CERTIFICATE_PATH, certificate, { encoding: 'binary' });
-    core.info(`Creating a temporary keychain...`);
-    yield (0, exec_1.exec)(`security create-keychain -p "${KEYCHAIN_PASSWORD}" ${KEYCHAIN_PATH}`);
-    yield (0, exec_1.exec)(`security set-keychain-settings -lut 21600 ${KEYCHAIN_PATH}`);
-    yield (0, exec_1.exec)(`security unlock-keychain -p "${KEYCHAIN_PASSWORD}" ${KEYCHAIN_PATH}`);
-    core.info(`Importing certificate to keychain...`);
-    yield (0, exec_1.exec)(`security import ${CERTIFICATE_PATH} -P "${certificatePassword}" -A -t cert -f pkcs12 -k ${KEYCHAIN_PATH}`);
-    yield (0, exec_1.exec)(`security list-keychain -d user -s ${KEYCHAIN_PATH}`);
-    core.info(`Applying provisioning profile...`);
+    core.info(`Creating a temporary Keychain...`);
+    yield (0, exec_1.exec)(`security create-keychain -p "${KEYCHAIN_PASSWORD}" ${exports.KEYCHAIN_PATH}`);
+    yield (0, exec_1.exec)(`security set-keychain-settings -lut 21600 ${exports.KEYCHAIN_PATH}`);
+    yield (0, exec_1.exec)(`security unlock-keychain -p "${KEYCHAIN_PASSWORD}" ${exports.KEYCHAIN_PATH}`);
+    core.info(`Importing certificate to Keychain...`);
+    yield (0, exec_1.exec)(`security import ${CERTIFICATE_PATH} -P "${certificatePassword}" -A -t cert -f pkcs12 -k ${exports.KEYCHAIN_PATH}`);
+    yield (0, exec_1.exec)(`security list-keychain -d user -s ${exports.KEYCHAIN_PATH}`);
+    core.info(`Writing provisioning profile file...`);
     fs.mkdirSync(PROFILES_DIRECTORY, { recursive: true });
-    fs.copyFileSync(PROFILE_PATH, path.join(PROFILES_DIRECTORY, PROFILE_NAME));
+    fs.copyFileSync(PROFILE_TEMP_PATH, exports.PROFILE_PATH);
     core.info(`Build environment setup completed.`);
 });
 exports.setupBuildEnvironment = setupBuildEnvironment;
