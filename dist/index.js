@@ -336,12 +336,14 @@ const path = __importStar(__nccwpck_require__(1017));
 const fs = __importStar(__nccwpck_require__(7147));
 const crypto = __importStar(__nccwpck_require__(6113));
 const CERTIFICATE_PATH = path.join(process.env.RUNNER_TEMP, 'build_certificate.p12');
-const PROFILE_PATH = path.join(process.env.RUNNER_TEMP, 'build_provisioning_profile.mobileprovision');
+const PROFILE_NAME = 'build_provisioning_profile.mobileprovision';
+const PROFILE_PATH = path.join(process.env.RUNNER_TEMP, PROFILE_NAME);
 const KEYCHAIN_PATH = path.join(process.env.RUNNER_TEMP, 'app-signing.keychain-db');
 const KEYCHAIN_PASSWORD = crypto.randomBytes(64).toString('hex');
+const PROFILES_DIRECTORY = path.join(process.env.HOME, 'Library/MobileDevice/Provisioning Profiles');
 const setupBuildEnvironment = (profile, certificate, certificatePassword) => __awaiter(void 0, void 0, void 0, function* () {
     core.info(`Importing "${profile.attributes.name}" provisioning profile...`);
-    const profileContents = Buffer.from(profile.attributes.profileContent, 'base64').toString();
+    const profileContents = Buffer.from(profile.attributes.profileContent, 'base64').toString('binary');
     fs.writeFileSync(PROFILE_PATH, profileContents, { encoding: 'binary' });
     core.info(`Importing certificate...`);
     fs.writeFileSync(CERTIFICATE_PATH, certificate, { encoding: 'binary' });
@@ -353,8 +355,8 @@ const setupBuildEnvironment = (profile, certificate, certificatePassword) => __a
     yield (0, exec_1.exec)(`security import ${CERTIFICATE_PATH} -P "${certificatePassword}" -A -t cert -f pkcs12 -k ${KEYCHAIN_PATH}`);
     yield (0, exec_1.exec)(`security list-keychain -d user -s ${KEYCHAIN_PATH}`);
     core.info(`Applying provisioning profile...`);
-    yield (0, exec_1.exec)(`mkdir -p "~/Library/MobileDevice/Provisioning Profiles"`);
-    yield (0, exec_1.exec)(`cp ${PROFILE_PATH} "~/Library/MobileDevice/Provisioning Profiles"`);
+    fs.mkdirSync(PROFILES_DIRECTORY, { recursive: true });
+    fs.copyFileSync(PROFILE_PATH, path.join(PROFILES_DIRECTORY, PROFILE_NAME));
     core.info(`Build environment setup completed.`);
 });
 exports.setupBuildEnvironment = setupBuildEnvironment;
