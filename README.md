@@ -1,4 +1,4 @@
-# Wolfia iOS Build Setup v0.0.5
+# Wolfia iOS Build Setup v0.0.6
 
 A GitHub Action to setup the environment for building and signing iOS apps.
 
@@ -34,7 +34,7 @@ See [action.yml](action.yml).
 ```yaml
 steps:
   - name: Setup iOS build environment
-    uses: wolfia-app/wolfia-ios-build-setup@v0.0.5
+    uses: wolfia-app/wolfia-ios-build-setup@v0.0.6
     with:
       app-store-connect-api-key-id: ${{ vars.APP_STORE_CONNECT_API_KEY_ID }}
       app-store-connect-api-issuer: ${{ vars.APP_STORE_CONNECT_API_ISSUER }}
