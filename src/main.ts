@@ -2,8 +2,15 @@ import {getInputs} from './inputs'
 import {AppStoreConnectAPI} from './api'
 import {fetchProfile} from './profile'
 import {setupBuildEnvironment} from './setup'
+import {isPost} from './state'
+import {cleanup} from './cleanup'
 
 async function run(): Promise<void> {
+  if (isPost) {
+    cleanup()
+    return
+  }
+
   const {
     appStoreConnectApiKey,
     appStoreConnectApiIssuer,

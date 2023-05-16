@@ -12,19 +12,21 @@ const CERTIFICATE_PATH = path.join(
 
 const PROFILE_NAME = 'build_provisioning_profile.mobileprovision'
 
-const PROFILE_PATH = path.join(process.env.RUNNER_TEMP!, PROFILE_NAME)
-
-const KEYCHAIN_PATH = path.join(
-  process.env.RUNNER_TEMP!,
-  'app-signing.keychain-db'
-)
-
-const KEYCHAIN_PASSWORD = crypto.randomBytes(64).toString('hex')
+const PROFILE_TEMP_PATH = path.join(process.env.RUNNER_TEMP!, PROFILE_NAME)
 
 const PROFILES_DIRECTORY = path.join(
   process.env.HOME!,
   'Library/MobileDevice/Provisioning Profiles'
 )
+
+export const PROFILE_PATH = path.join(PROFILES_DIRECTORY, PROFILE_NAME)
+
+export const KEYCHAIN_PATH = path.join(
+  process.env.RUNNER_TEMP!,
+  'app-signing.keychain-db'
+)
+
+const KEYCHAIN_PASSWORD = crypto.randomBytes(64).toString('hex')
 
 export const setupBuildEnvironment = async (
   profile: Profile,
@@ -36,12 +38,12 @@ export const setupBuildEnvironment = async (
     profile.attributes.profileContent,
     'base64'
   ).toString('binary')
-  fs.writeFileSync(PROFILE_PATH, profileContents, {encoding: 'binary'})
+  fs.writeFileSync(PROFILE_TEMP_PATH, profileContents, {encoding: 'binary'})
 
   core.info(`Importing certificate...`)
   fs.writeFileSync(CERTIFICATE_PATH, certificate, {encoding: 'binary'})
 
-  core.info(`Creating a temporary keychain...`)
+  core.info(`Creating a temporary Keychain...`)
   await exec(
     `security create-keychain -p "${KEYCHAIN_PASSWORD}" ${KEYCHAIN_PATH}`
   )
@@ -50,15 +52,15 @@ export const setupBuildEnvironment = async (
     `security unlock-keychain -p "${KEYCHAIN_PASSWORD}" ${KEYCHAIN_PATH}`
   )
 
-  core.info(`Importing certificate to keychain...`)
+  core.info(`Importing certificate to Keychain...`)
   await exec(
     `security import ${CERTIFICATE_PATH} -P "${certificatePassword}" -A -t cert -f pkcs12 -k ${KEYCHAIN_PATH}`
   )
   await exec(`security list-keychain -d user -s ${KEYCHAIN_PATH}`)
 
-  core.info(`Applying provisioning profile...`)
+  core.info(`Writing provisioning profile file...`)
   fs.mkdirSync(PROFILES_DIRECTORY, {recursive: true})
-  fs.copyFileSync(PROFILE_PATH, path.join(PROFILES_DIRECTORY, PROFILE_NAME))
+  fs.copyFileSync(PROFILE_TEMP_PATH, PROFILE_PATH)
 
   core.info(`Build environment setup completed.`)
 }
