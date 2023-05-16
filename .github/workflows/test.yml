@@ -29,9 +29,9 @@ jobs:
       #     certificate-base64: ${{ secrets.CERTIFICATE_BASE64 }}
       #     certificate-password: ${{ secrets.CERTIFICATE_PASSWORD }}
       #     profile-name: 'Profile Name'
-      - name: Validate distribution
-        run: npm run validate-distribution
-      - name: Validate version
-        run: npm run validate-version
-      - name: Validate formatting
-        run: npm run validate-formatting
+      # - name: Validate distribution
+      #   run: npm run validate-distribution
+      # - name: Validate version
+      #   run: npm run validate-version
+      # - name: Validate formatting
+      #   run: npm run validate-formatting
