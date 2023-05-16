@@ -79,6 +79,45 @@ exports.AppStoreConnectAPI = AppStoreConnectAPI;
 
 /***/ }),
 
+/***/ 9767:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.cleanup = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const cleanup = () => {
+    core.info('Cleaning up...');
+};
+exports.cleanup = cleanup;
+
+
+/***/ }),
+
 /***/ 6180:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -212,8 +251,14 @@ const inputs_1 = __nccwpck_require__(6180);
 const api_1 = __nccwpck_require__(8947);
 const profile_1 = __nccwpck_require__(6171);
 const setup_1 = __nccwpck_require__(7391);
+const state_1 = __nccwpck_require__(9249);
+const cleanup_1 = __nccwpck_require__(9767);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
+        if (state_1.isPost) {
+            (0, cleanup_1.cleanup)();
+            return;
+        }
         const { appStoreConnectApiKey, appStoreConnectApiIssuer, appStoreConnectSecret, certificate, certificatePassword, profileName } = (0, inputs_1.getInputs)();
         const api = new api_1.AppStoreConnectAPI({
             appStoreConnectApiKey,
@@ -360,6 +405,47 @@ const setupBuildEnvironment = (profile, certificate, certificatePassword) => __a
     core.info(`Build environment setup completed.`);
 });
 exports.setupBuildEnvironment = setupBuildEnvironment;
+
+
+/***/ }),
+
+/***/ 9249:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isPost = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+// Indicates whether the action is running as post job cleanup.
+exports.isPost = !!core.getState('isPost');
+// Publish a variable so the post action run knows to cleanup.
+if (!exports.isPost) {
+    core.saveState('isPost', 'true');
+}
 
 
 /***/ }),
