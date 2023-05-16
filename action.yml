@@ -1,8 +1,8 @@
 name: 'Wolfia iOS Build Setup'
-description: 'An action to setup the environment for building iOS apps'
+description: 'A GitHub Action to setup the environment for building and signing iOS apps.'
 author: 'Wolfia'
 branding:
-  icon: 'smartphone'
+  icon: 'tool'
   color: 'gray-dark'
 inputs:
   app-store-connect-api-key-id:
