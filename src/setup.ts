@@ -31,7 +31,7 @@ export const setupBuildEnvironment = async (
   const profileContents = Buffer.from(
     profile.attributes.profileContent,
     'base64'
-  ).toString('binary')
+  ).toString()
   fs.writeFileSync(PROFILE_PATH, profileContents, {encoding: 'binary'})
 
   core.info(`Importing certificate...`)
