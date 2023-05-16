@@ -1,6 +1,6 @@
 {
   "name": "wolfia-ios-build-setup",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "description": "An action to setup the environment for building iOS apps",
   "main": "lib/main.js",
@@ -29,6 +29,7 @@
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.10.0",
+    "@actions/exec": "^1.1.1",
     "axios": "^1.4.0",
     "jsonwebtoken": "^9.0.0"
   },

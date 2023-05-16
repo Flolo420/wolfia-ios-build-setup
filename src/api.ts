@@ -1,4 +1,6 @@
+import * as core from '@actions/core'
 import axios from 'axios'
+import {TokenOptions, getToken} from './jwt'
 
 const APP_STORE_CONNECT_API_BASE = 'https://api.appstoreconnect.apple.com'
 
@@ -12,7 +14,7 @@ export enum ProfileState {
   INVALID = 'INVALID'
 }
 
-interface Profile {
+export interface Profile {
   id: string
   attributes: {
     name: string
@@ -24,8 +26,8 @@ interface Profile {
 export class AppStoreConnectAPI {
   token: string
 
-  constructor(token: string) {
-    this.token = token
+  constructor(tokenOptions: TokenOptions) {
+    this.token = getToken(tokenOptions)
   }
 
   private async get<Result>(resource: string): Promise<Result> {
@@ -42,6 +44,7 @@ export class AppStoreConnectAPI {
   }
 
   async getProfiles(): Promise<APIResponse<Profile[]>> {
+    core.info(`Fetching profiles...`)
     return this.get('/v1/profiles')
   }
 }

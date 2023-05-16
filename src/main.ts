@@ -1,50 +1,28 @@
-import * as core from '@actions/core'
 import {getInputs} from './inputs'
-import {getToken} from './jwt'
-
-import {AppStoreConnectAPI, ProfileState} from './api'
+import {AppStoreConnectAPI} from './api'
+import {fetchProfile} from './profile'
+import {setupBuildEnvironment} from './setup'
 
 async function run(): Promise<void> {
   const {
     appStoreConnectApiKey,
     appStoreConnectApiIssuer,
     appStoreConnectSecret,
+    certificate,
+    certificatePassword,
     profileName
   } = getInputs()
 
-  core.info(`Generating JWT...`)
-  const token = getToken({
+  const api = new AppStoreConnectAPI({
     appStoreConnectApiKey,
     appStoreConnectApiIssuer,
     appStoreConnectSecret
   })
-  const api = new AppStoreConnectAPI(token)
 
-  core.info(`Fetching profiles...`)
-  const profiles = await api.getProfiles()
-  const profile = profiles.data.find(
-    prof => prof.attributes.name === profileName
-  )
+  const profile = await fetchProfile(api, profileName)
+  if (!profile) return
 
-  if (!profile) {
-    core.setFailed(
-      `Profile "${profileName}" not found. Please confirm the profile name is correct and exists.`
-    )
-    return
-  }
-
-  if (profile.attributes.profileState !== ProfileState.ACTIVE) {
-    core.setFailed(
-      `Profile "${profileName}" is ${profile.attributes.profileState}. Please confirm the profile is active and valid.`
-    )
-    return
-  }
-
-  core.info(`Profile "${profileName}" found.`)
-  // Hide the value from being output in logs.
-  core.setSecret(profile.attributes.profileContent)
-  // Output the value so subsequent steps can use it.
-  core.setOutput('provisioning-profile', profile.attributes.profileContent)
+  await setupBuildEnvironment(profile, certificate, certificatePassword)
 }
 
 run()

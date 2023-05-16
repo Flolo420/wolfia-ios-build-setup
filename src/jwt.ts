@@ -1,18 +1,22 @@
+import * as core from '@actions/core'
 import jwt, {SignOptions} from 'jsonwebtoken'
 
 const getNowSeconds = (): number => Math.round(new Date().getTime() / 1000)
 
 const EXPIRATION_TIME = 10 * 60 // 10 minutes
 
+export interface TokenOptions {
+  appStoreConnectApiKey: string
+  appStoreConnectApiIssuer: string
+  appStoreConnectSecret: string
+}
+
 export const getToken = ({
   appStoreConnectApiKey,
   appStoreConnectApiIssuer,
   appStoreConnectSecret
-}: {
-  appStoreConnectApiKey: string
-  appStoreConnectApiIssuer: string
-  appStoreConnectSecret: string
-}): string => {
+}: TokenOptions): string => {
+  core.info(`Generating JWT...`)
   const exp = getNowSeconds() + EXPIRATION_TIME
 
   const payload = {
